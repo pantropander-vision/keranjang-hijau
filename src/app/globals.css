@@ -1,12 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@theme {
+  /* Brand Colors */
+  --color-brand-green:        #1E6B2E;
+  --color-brand-green-light:  #2D8A40;
+  --color-brand-green-dark:   #144D20;
+  --color-brand-cream:        #FDF6EC;
+  --color-brand-orange:       #D45F1A;
+  --color-brand-orange-light: #E8722A;
+  --color-brand-dark:         #111827;
+  --color-brand-gray:         #F3F4F6;
+  --color-brand-gray-dark:    #E5E7EB;
 
-:root {
-  --brand-green: #2D7A3A;
-  --brand-cream: #FFF8F0;
-  --brand-orange: #E8722A;
-  --brand-dark: #1A1A1A;
+  /* Semantic */
+  --color-success:  #16A34A;
+  --color-warning:  #D97706;
+  --color-error:    #DC2626;
+
+  /* Typography */
+  --font-sans: 'Plus Jakarta Sans', 'Nunito', ui-sans-serif, system-ui, sans-serif;
+
+  /* Border radius */
+  --radius-card:   12px;
+  --radius-button: 10px;
 }
 
 * {
@@ -19,71 +36,67 @@ html {
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif;
-  background-color: #FFF8F0;
-  color: #1A1A1A;
+  font-family: var(--font-sans);
+  background-color: var(--color-brand-cream);
+  color: var(--color-brand-dark);
   min-height: 100vh;
-  /* Safe area for mobile bottom nav */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Mobile-optimized tap targets */
+/* Mobile tap targets */
 button, a, [role="button"] {
   min-height: 44px;
   min-width: 44px;
 }
 
-/* Smooth scrolling for category strips */
+/* Horizontal scroll without scrollbar */
 .scroll-x {
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.scroll-x::-webkit-scrollbar {
-  display: none;
-}
+.scroll-x::-webkit-scrollbar { display: none; }
 
-/* Card styles */
+/* Card base */
 .card {
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 2px 12px rgba(0,0,0,0.04);
 }
 
-/* Skeleton loader */
+/* Skeleton shimmer */
 @keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
+  0%   { background-position: -400px 0; }
+  100% { background-position: calc(400px + 100%) 0; }
 }
-
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200px 100%;
-  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg, #ececec 25%, #ddd 50%, #ececec 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite;
   border-radius: 8px;
 }
 
-/* Bottom navigation safe area */
+/* Bottom nav safe area */
 .bottom-nav {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
-/* IDR price formatting */
+/* Price text */
 .price {
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  color: var(--brand-green);
+  font-weight: 700;
+  color: var(--color-brand-green);
 }
 
 /* Verified badge */
 .badge-verified {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: #E8F5E9;
-  color: #2D7A3A;
+  gap: 3px;
+  background: #DCFCE7;
+  color: #15803D;
   border-radius: 999px;
   padding: 2px 8px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
 }
