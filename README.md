@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Keranjang Hijau 🟢
+
+**Marketplace B2B untuk bisnis F&B Indonesia**
+
+> "Semua yang bisnis F&B kamu butuhkan — dari supplier sampai jasa — dalam satu tempat terpercaya."
+
+---
+
+## Stack
+
+- **Frontend:** Next.js 15 + TypeScript + Tailwind CSS
+- **Database:** PostgreSQL (via Prisma ORM)
+- **Cache:** Redis
+- **Auth:** OTP via SMS (phone-first)
+- **Payments:** Midtrans / Xendit
+- **Storage:** Cloudflare R2
+- **Hosting:** Vercel (Singapore region)
+- **CDN:** Cloudflare
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Copy env file
+cp .env.example .env.local
+# Fill in your values
+
+# Run DB migrations
+npx prisma migrate dev
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── (auth)/          # Login, Register
+│   ├── (main)/          # Authenticated user pages
+│   ├── (dashboard)/     # Seller dashboard
+│   ├── (admin)/         # Admin panel
+│   └── api/             # API routes
+├── components/
+│   ├── layout/          # BottomNav, Header, etc.
+│   ├── listing/         # Listing cards, detail
+│   ├── chat/            # Messaging components
+│   ├── order/           # Order flow
+│   └── ui/              # Shared UI primitives
+├── lib/                 # Constants, utils, db
+├── types/               # TypeScript types
+└── hooks/               # Custom React hooks
+```
 
-## Learn More
+## Key Pages
 
-To learn more about Next.js, take a look at the following resources:
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page |
+| `/masuk` | Login (OTP) |
+| `/daftar` | Register + Onboarding |
+| `/beranda` | Personalized home feed |
+| `/cari` | Search & browse |
+| `/produk/[id]` | Listing detail |
+| `/pesan` | Chat inbox |
+| `/pesanan` | Orders (buyer) |
+| `/dashboard` | Seller dashboard |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See `.env.example` for all required variables.
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Hosted on Vercel (Singapore `sin1` region) at:
+`https://keranjanghijau.zoeclouds.com`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Built with ❤️ for UMKM F&B Indonesia.

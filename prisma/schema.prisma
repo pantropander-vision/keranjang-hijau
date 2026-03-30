@@ -1,0 +1,287 @@
+// Keranjang Hijau — Prisma Schema
+// PostgreSQL (primary database)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
+enum BusinessType {
+  restaurant
+  cafe
+  catering
+  cloud_kitchen
+  food_producer
+  bakery
+  food_truck
+  supplier
+  service_provider
+  other
+}
+
+enum ListingType {
+  product
+  service
+}
+
+enum PricingType {
+  fixed
+  package
+  negotiable
+}
+
+enum DeliveryOption {
+  pickup
+  delivery
+  both
+}
+
+enum OrderType {
+  product_order
+  service_project
+}
+
+enum OrderStatus {
+  pending
+  accepted
+  in_progress
+  delivered
+  completed
+  disputed
+  cancelled
+}
+
+enum PaymentStatus {
+  pending
+  escrowed
+  released
+  refunded
+}
+
+enum MessageType {
+  text
+  image
+  file
+  voice
+}
+
+enum CategoryType {
+  product
+  service
+}
+
+enum SubscriptionPlan {
+  gratis
+  pro
+  bisnis
+}
+
+// ─────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────
+
+model User {
+  id                String       @id @default(cuid())
+  phone             String       @unique
+  email             String?      @unique
+  name              String
+  avatar            String?
+  bio               String?
+  businessName      String?
+  businessType      BusinessType @default(other)
+  city              String?
+  kecamatan         String?
+  latitude          Float?
+  longitude         Float?
+  verificationLevel Int          @default(1)
+  isSeller          Boolean      @default(false)
+  isBuyer           Boolean      @default(true)
+  subscriptionPlan  SubscriptionPlan @default(gratis)
+  isActive          Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  lastActive        DateTime     @default(now())
+
+  // Relations
+  listings          Listing[]
+  buyerOrders       Order[]      @relation("BuyerOrders")
+  sellerOrders      Order[]      @relation("SellerOrders")
+  reviewsGiven      Review[]     @relation("ReviewsGiven")
+  reviewsReceived   Review[]     @relation("ReviewsReceived")
+  conversations     ConversationParticipant[]
+  messages          Message[]
+  savedListings     SavedListing[]
+}
+
+// ─────────────────────────────────────────
+// CATEGORY
+// ─────────────────────────────────────────
+
+model Category {
+  id           String       @id @default(cuid())
+  parentId     String?
+  parent       Category?    @relation("SubCategories", fields: [parentId], references: [id])
+  children     Category[]   @relation("SubCategories")
+  nameId       String       // Bahasa Indonesia name
+  nameEn       String?
+  icon         String?
+  description  String?
+  type         CategoryType
+  displayOrder Int          @default(0)
+  isActive     Boolean      @default(true)
+
+  listings     Listing[]
+}
+
+// ─────────────────────────────────────────
+// LISTING
+// ─────────────────────────────────────────
+
+model Listing {
+  id              String         @id @default(cuid())
+  sellerId        String
+  seller          User           @relation(fields: [sellerId], references: [id])
+  type            ListingType
+  categoryId      String
+  category        Category       @relation(fields: [categoryId], references: [id])
+  title           String
+  description     String
+  images          String[]
+  videos          String[]
+  pricingType     PricingType    @default(fixed)
+  basePrice       Float?
+  packages        Json?          // Array of { name, price, description, deliverables }
+  minOrderQty     Int?
+  unit            String?        // kg, pcs, karton, etc.
+  stockCount      Int?
+  deliveryOptions DeliveryOption @default(both)
+  deliveryArea    String?
+  tags            String[]
+  isActive        Boolean        @default(true)
+  isFeatured      Boolean        @default(false)
+  isBoosted       Boolean        @default(false)
+  boostExpiresAt  DateTime?
+  viewCount       Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  orders          Order[]
+  reviews         Review[]
+  savedBy         SavedListing[]
+  conversations   Conversation[]
+}
+
+model SavedListing {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+}
+
+// ─────────────────────────────────────────
+// ORDER
+// ─────────────────────────────────────────
+
+model Order {
+  id              String        @id @default(cuid())
+  buyerId         String
+  buyer           User          @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId        String
+  seller          User          @relation("SellerOrders", fields: [sellerId], references: [id])
+  listingId       String
+  listing         Listing       @relation(fields: [listingId], references: [id])
+  type            OrderType
+  status          OrderStatus   @default(pending)
+  items           Json          // Array of { listingId, qty, unitPrice, subtotal }
+  totalAmount     Float
+  platformFee     Float
+  sellerPayout    Float
+  paymentStatus   PaymentStatus @default(pending)
+  paymentMethod   String?
+  paymentRef      String?
+  deliveryAddress Json?         // { street, city, kecamatan, postalCode }
+  milestones      Json?         // Array of { title, amount, status, deliverableUrl }
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  completedAt     DateTime?
+
+  review          Review?
+  conversation    Conversation?
+}
+
+// ─────────────────────────────────────────
+// REVIEW
+// ─────────────────────────────────────────
+
+model Review {
+  id           String   @id @default(cuid())
+  orderId      String   @unique
+  order        Order    @relation(fields: [orderId], references: [id])
+  listingId    String
+  listing      Listing  @relation(fields: [listingId], references: [id])
+  reviewerId   String
+  reviewer     User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  revieweeId   String
+  reviewee     User     @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+  rating       Int      // 1–5
+  text         String?
+  photos       String[]
+  quality      Int?     // 1–5
+  communication Int?
+  timeliness   Int?
+  value        Int?
+  responseText String?  // Seller's reply
+  createdAt    DateTime @default(now())
+}
+
+// ─────────────────────────────────────────
+// CHAT / CONVERSATION
+// ─────────────────────────────────────────
+
+model Conversation {
+  id           String   @id @default(cuid())
+  listingId    String?
+  listing      Listing? @relation(fields: [listingId], references: [id])
+  orderId      String?  @unique
+  order        Order?   @relation(fields: [orderId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User        @relation(fields: [senderId], references: [id])
+  type           MessageType @default(text)
+  content        String
+  readAt         DateTime?
+  createdAt      DateTime    @default(now())
+}
